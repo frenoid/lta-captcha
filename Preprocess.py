@@ -28,6 +28,6 @@ def processImage(image_name):
 
   width, height = im2.size
   im2 = im2.resize((width*5, height*5), Image.NEAREST)
-  im2.save("output.png")
+  im2.save(image_name+"_output.png")
 
-  return "output.png"
+  return image_name + "_output.png"
