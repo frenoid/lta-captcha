@@ -15,7 +15,6 @@ def breakCaptcha(image_name):
     #   Perform OCR using tesseract-ocr library
     text = pytesseract.image_to_string(img)
 
-
     return text
 
 if __name__ == "__main__":
