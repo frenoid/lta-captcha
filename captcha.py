@@ -7,7 +7,10 @@ from captcha_solver import CaptchaSolver
 def breakCaptcha(image_name):
 
     processed_image = processImage(image_name)
-    img = Image.open(image_name)
+    try:
+        img = Image.open(image_name)
+    except IOError:
+        return "Error"
 
     #   Perform OCR using tesseract-ocr library
     text = pytesseract.image_to_string(img)
@@ -20,8 +23,10 @@ if __name__ == "__main__":
 	chdir("lta-images")
 	print "%d images in folder" % len(images)
         correct_count  = 0
+        total_count = 0 
 
 	for img_name in images:
+            total_count += 1
 	    print "%s loaded" % img_name
 	    answer = img_name.strip('.png')
 
@@ -36,7 +41,8 @@ if __name__ == "__main__":
             except UnicodeEncodeError:
                 print "Wrong answer"
 
-        print "%d out of %d is correct"  % (correct_count, len(images))
+            print "%d out of %d is correct" % (correct_count, total_count)
+
 
 
 

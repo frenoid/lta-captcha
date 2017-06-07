@@ -2,19 +2,25 @@ from PIL import Image, ImageFilter, ImageEnhance
 from operator import itemgetter
 
 def processImage(image_name):
-  im = Image.open(image_name)
+  try:
+    im = Image.open(image_name)
+  except IOError:
+    return "Error"
+
   im = im.convert("P")
 
   his = im.histogram()
   values = {}
 
-  print his
+  # print his
 
   for i in range(256):
     values[i] = his[i]
 
+  """
   for j,k in sorted(values.items(), key=itemgetter(1), reverse=True)[:10]:
     print j,k
+  """
 
   temp = {}
   im2 = Image.new("P",im.size,255)
