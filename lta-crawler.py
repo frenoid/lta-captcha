@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
             # Check if no records found
             try:
-                query_status = WebDriverWait(driver,5).until(
+                query_status = WebDriverWait(driver,3).until(
                               EC.presence_of_element_located((By.CLASS_NAME, "errorTxtRedBold12pt"))
                               )
                 if "No record found" in query_status.text:
