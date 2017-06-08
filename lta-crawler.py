@@ -68,17 +68,18 @@ if __name__ == "__main__":
 
     driver_count = 0
     for driver_num in driver_numbers:
+            query_success = False
 
+            # If captcha code has not been reset, go back
+            # Otherwise refresh the main page
             if captcha_code != "":
                 driver.back()
             else:
                 driver.get(base_page)
-                captcha_code = raw_input("Enter new captcha code: ")
-            driver_count  += 1
 
-            query_success = False
+            driver_count  += 1
             print "#%d Checking %s" % (driver_count, driver_num)
-            sleep(1)
+            sleep(2)
 
             actions = ActionChains(driver)
             actions.send_keys(Keys.RETURN)
@@ -96,6 +97,10 @@ if __name__ == "__main__":
                     success = True
                 except NoSuchFrameException:
                     pass
+
+            if captcha_code == "":
+                captcha_code = raw_input("Enter new captcha code: ")
+
 
             # Send in veh no
             veh_no_field = WebDriverWait(driver, 15).until(
@@ -119,9 +124,8 @@ if __name__ == "__main__":
             captcha_input = WebDriverWait(driver, 15).until(
                             EC.presence_of_element_located((By.NAME, "captchaResponse"))
                             )
-            if captcha_input.get_attribute("value") == "" or captcha_code == "":
-                captcha_code = raw_input("Enter new captcha code: ")
-                captcha_input.send_keys(captcha_code)
+            captcha_input.clear()
+            captcha_input.send_keys(captcha_code)
 
 
             """
@@ -175,7 +179,7 @@ if __name__ == "__main__":
             submit_button = WebDriverWait(driver, 15).until(
                             EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[5]/div/input[1]"))
                             )
-            for i in range(10):
+            for i in range(1):
                 try:
                     submit_button.click()
                 except StaleElementReferenceException:
@@ -184,6 +188,7 @@ if __name__ == "__main__":
 
             sleep(1)
 
+            # Check if no records found
             try:
                 query_status = WebDriverWait(driver,5).until(
                               EC.presence_of_element_located((By.CLASS_NAME, "errorTxtRedBold12pt"))
@@ -191,16 +196,36 @@ if __name__ == "__main__":
                 if "No record found" in query_status.text:
                     print "No record found. Captcha reset"
                     captcha_code = ""
+
+                    # Write the LTA data into the .csv file
+                    with open('drivers_pdvl.csv', 'ab') as csv_file:
+                        writer = csv.writer(csv_file)
+                        driver_info = [driver_count, driver_num,"No record","No record","No record"] 
+                        writer.writerow(driver_info)
+                        query_success = True
+
+                if query_success == True:
+                    with open("driver_numbers.txt", "r") as f:
+                        f_lines = f.readlines()
+                    with open("driver_numbers.txt","w") as f:
+                        for line in f_lines:
+                            if line != driver_num + "\n":
+                                f.write(line)
+                            else:
+                                print "1 line removed"
+
+                    print driver_num, "has been successfully queried"
+                    # Go to next query
                     continue
+
             except TimeoutException, StaleElementReferenceException:
                 pass
 
-            # driver.switch_to.frame('main')
+            # Where a record was found in the system
             # Get pdvl info
             pdvl_status = WebDriverWait(driver,5).until(
                           EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div/div/div[2]/div[2]/form/div[2]/div/p"))
                           )
-            # print driver_num, "PDVL status:", pdvl_status.text
 
             # Get car_make
             car_make = WebDriverWait(driver,5).until(
@@ -211,20 +236,20 @@ if __name__ == "__main__":
             decal_num = WebDriverWait(driver,5).until(
                         EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div/div/div[2]/div[2]/form/div[4]/div/p"))
                         )
-            # print driver_num, "decal_num:", decal_num.text
 
             driver_info = [driver_count, driver_num, pdvl_status.text, car_make.text, decal_num.text]
             print driver_info
 
+            # Write the LTA data into the .csv file
             with open('drivers_pdvl.csv', 'ab') as csv_file:
                 writer = csv.writer(csv_file)
                 writer.writerow(driver_info)
                 query_success = True
 
+            # If query complete, remove the driver number from text file
             if query_success == True:
                 with open("driver_numbers.txt", "r") as f:
                     f_lines = f.readlines()
-
                 with open("driver_numbers.txt","w") as f:
                     for line in f_lines:
                         if line != driver_num + "\n":
