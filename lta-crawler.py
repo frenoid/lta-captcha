@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
             driver_count  += 1
             print "#%d Checking %s" % (driver_count, driver_num)
-            sleep(2)
+            sleep(1)
 
             actions = ActionChains(driver)
             actions.send_keys(Keys.RETURN)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
 
             # Send in veh no
-            veh_no_field = WebDriverWait(driver, 15).until(
+            veh_no_field = WebDriverWait(driver, 10).until(
                    EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[1]/div[2]/input"))
                    )
             veh_no_field.clear()
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             print "Vehicle number entered"
 
             # Tick the checkbox
-            checkbox = WebDriverWait(driver, 15).until(
+            checkbox = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.NAME, "tcCheckbox"))
                     )
             if checkbox.is_selected() == True:
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                 print "Check checkbox"
 
             # Ensure captcha is filled, otherwise, ask for new captcha
-            captcha_input = WebDriverWait(driver, 15).until(
+            captcha_input = WebDriverWait(driver, 10).until(
                             EC.presence_of_element_located((By.NAME, "captchaResponse"))
                             )
             captcha_input.clear()
