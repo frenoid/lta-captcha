@@ -6,9 +6,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
-import pickle
-from captcha import breakCaptcha
-from urllib import urlretrieve
+# import pickle
+# from captcha import breakCaptcha
+# from urllib import urlretrieve
 import csv
 
 if __name__ == "__main__":
