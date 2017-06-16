@@ -6,9 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
-# import pickle
-# from captcha import breakCaptcha
-# from urllib import urlretrieve
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 import csv
 
 if __name__ == "__main__":
@@ -21,7 +19,15 @@ if __name__ == "__main__":
 
     print "%d vehicle numbers loaded" % (len(driver_numbers))
 
-    driver =  webdriver.Firefox()
+    # Get location of firefox binary
+    with open("firefox_binary.txt", "r") as f:
+        binary_location = f.read()
+
+    binary = FirefoxBinary(str(binary_location))
+    driver = webdriver.Firefox(firefox_binary=binary)
+    
+
+    # driver =  webdriver.Firefox()
     base_page = "https://vrl.lta.gov.sg/lta/vrl/action/pubfunc2?ID=EnquirePrivateHireScheme"
     prime_page = "https://vrl.lta.gov.sg/lta/vrl/action/enquirePrivateHireCars?FUNCTION_ID=F0401023ET"
 
