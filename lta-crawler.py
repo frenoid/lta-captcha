@@ -19,12 +19,14 @@ if __name__ == "__main__":
 
     print "%d vehicle numbers loaded" % (len(driver_numbers))
 
+    """
     # Get location of firefox binary
     with open("firefox_binary.txt", "r") as f:
         binary_location = f.read()
-
     binary = FirefoxBinary(str(binary_location))
-    driver = webdriver.Firefox(firefox_binary=binary)
+    """
+
+    driver = webdriver.Chrome()
     
 
     # driver =  webdriver.Firefox()
@@ -133,49 +135,6 @@ if __name__ == "__main__":
             captcha_input.clear()
             captcha_input.send_keys(captcha_code)
 
-
-            """
-            # Get captcha_image
-            driver.switch_to.frame(driver.find_element(By.CLASS_NAME, "captcha"))
-
-            
-            #captcha_success, attempt_count = False, 0
-            # while not captcha_success:
-            #   attempt_count += 1
-            #    print "Attempt %d" % (attempt_count)
-            captcha_image = WebDriverWait(driver, 15).until( 
-                            EC.presence_of_element_located((By.XPATH, "/html/body/img"))
-                            )
-            src = captcha_image.get_attribute('src')
-            urlretrieve(src, "captcha.png")
-            print "Captcha image downloaded"
-
-            captcha_code = breakCaptcha("captcha.png")
-            print "Breaking captcha"
-            try:
-                print captcha_code
-            except UnicodeEncodeError:
-                print "Unicode Error"
-
-                # Get a new captcha code
-                if not captcha_success:
-                    print "Captcha OCR failed. Get new captcha"
-                    new_captcha_button = WebDriverWait(driver, 10).until(
-                                         EC.presence_of_element_located((By.XPATH, "/html/body/a"))
-                                        )
-                    new_captcha_button.click()
-                    new_captcha_button.click()
-                    new_captcha_button.click()
-                    sleep(2)
-
-            # Send in captcha code
-            driver.switch_to.default_content()
-            driver.switch_to.frame("main")
-            captcha_input = WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.NAME, "captchaResponse"))
-                    )
-            captcha_input.send_keys(captcha_code)
-            """
     
             # Click the submit button
             driver.switch_to.default_content()
