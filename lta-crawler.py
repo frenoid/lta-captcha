@@ -6,7 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 import csv
 
 if __name__ == "__main__":
