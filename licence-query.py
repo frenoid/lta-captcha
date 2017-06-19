@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
+from sys import argv
 import csv
 # from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
@@ -48,7 +49,7 @@ def inputDriverDetails(driver, name , nric, day, month, year):
 
     return
 
-def readDriverLicences(driver, nric, dax_dob, name,
+def readDriverLicences(driver,query_no,  nric, dax_dob, name,
                         private_car, private_car_validity, private_car_expiry,
                         taxi, taxi_validity, taxi_expiry,
                         omnibus, omnibus_validity, omnibus_expiry,
@@ -99,7 +100,7 @@ def readDriverLicences(driver, nric, dax_dob, name,
             query_success = True
             break
 
-    driver_info = [nric, dax_dob, name,
+    driver_info = [query_no, nric, dax_dob, name,
                    private_car, private_car_validity, private_car_expiry,\
                    taxi, taxi_validity, taxi_expiry,\
                    omnibus, omnibus_validity, omnibus_expiry,\
@@ -140,11 +141,15 @@ def getResponse(driver):
 
 # Main function begins here
 if __name__ == "__main__":
+
     daxs = {}
     with open("drivers_nric_dob.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             # print row
+
+            # make id_no an int
+            id_no = int(row["id_no"])
 
             # check for 2-digit birth day
             if len(row["day"]) < 2:
@@ -158,9 +163,25 @@ if __name__ == "__main__":
             else:
                 two_digit_month = row["month"]    
 
-            daxs[row["nric"]] = [row["name"], two_digit_day, two_digit_month, row["year"]]
+            daxs[id_no] = [row["nric"],row["name"], two_digit_day, two_digit_month, row["year"]]
+        print str(len(daxs)), "drivers loaded"
+        # print daxs
 
-    print str(len(daxs)), "drivers loaded for checking"
+
+    if len(argv) < 1:
+        print "Need at least one argument"
+        print "Either <all>"
+        print "Or <start_no> <end_no>"
+        print "Or <start_no> <all>"
+    elif argv[1] == "all":
+        queries = range(1, len(daxs)+1)
+        print "Getting %d queries" % (len(daxs))
+    elif argv[2] == "all":
+        queries = range(int(argv[1]), len(daxs))
+        print "Getting %d to %d" % (int(argv[1]), len(daxs))
+    else:
+        queries  = range(int(argv[1]), int(argv[2]))
+        print "Getting %d to %d" % (int(argv[1]), len(daxs))
 
 
     driver = webdriver.Chrome()
@@ -171,17 +192,14 @@ if __name__ == "__main__":
     driver.get(base_page)
 
 
-    for query_no, nric in enumerate(daxs):
-
-        # Skip if NRIC is blank, means it's an invalid NRIC
-        if nric == "":
-            continue
+    for query_no in queries:
 
         print "****** # %d" % (query_no)
         query_success = True
 
         # Data to output
-        name = daxs[nric][0]
+        nric = daxs[query_no][0]
+        name = daxs[query_no][1]
         private_car, private_car_validity, private_car_expiry = "No", "" ,""
         taxi, taxi_validity, taxi_expiry = "No", "", ""
         omnibus, omnibus_validity ,omnibus_expiry = "No", "", ""
@@ -189,11 +207,17 @@ if __name__ == "__main__":
         bus_attendant, bus_attendant_validity, bus_attendant_expiry = "No", "", ""
         trishaw, trishaw_validity ,trishaw_expiry = "No", "", ""
 
+        # Skip if NRIC is blank, means it's an invalid NRIC
+        if nric == "":
+            print "Blank NRIC. Next"
+            continue
+
+
         print "Querying", nric
-        dax_dob = str(daxs[nric][1]) +"-"+ str(daxs[nric][2]) +"-"+ str(daxs[nric][3])
+        dax_dob = str(daxs[query_no][2]) +"-"+ str(daxs[query_no][3]) +"-"+ str(daxs[query_no][4])
 
         try:
-            inputDriverDetails(driver, name=name, nric=nric, day=daxs[nric][1], month=daxs[nric][2], year=daxs[nric][3])
+            inputDriverDetails(driver, name=name, nric=nric, day=daxs[query_no][2], month=daxs[query_no][3], year=daxs[query_no][4])
             record_found, query_success = getResponse(driver)
 
 
@@ -211,7 +235,7 @@ if __name__ == "__main__":
 
         # Will only proceed to extract driver info if a record was found, other proceed to writing the csv
         if record_found == True: 
-            driver_info = readDriverLicences(driver, nric, name, dax_dob,
+            driver_info = readDriverLicences(driver, query_no, nric, name, dax_dob,
                             private_car, private_car_validity, private_car_expiry,
                             taxi, taxi_validity, taxi_expiry,
                             omnibus, omnibus_validity, omnibus_expiry,
@@ -219,7 +243,7 @@ if __name__ == "__main__":
                             bus_attendant, bus_attendant_validity, bus_attendant_expiry,
                             trishaw, trishaw_validity, trishaw_expiry)
         else:
-            driver_info =   driver, nric, name, dax_dob,\
+            driver_info =   query_no ,nric, name, dax_dob,\
                             private_car, private_car_validity, private_car_expiry,\
                             taxi, taxi_validity, taxi_expiry,\
                             omnibus, omnibus_validity, omnibus_expiry,\
