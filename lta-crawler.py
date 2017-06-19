@@ -19,13 +19,6 @@ if __name__ == "__main__":
 
     print "%d vehicle numbers loaded" % (len(driver_numbers))
 
-    """
-    # Get location of firefox binary
-    with open("firefox_binary.txt", "r") as f:
-        binary_location = f.read()
-    binary = FirefoxBinary(str(binary_location))
-    """
-
     driver = webdriver.Chrome()
     
 

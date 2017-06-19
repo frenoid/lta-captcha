@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchFrameException, StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchFrameException, StaleElementReferenceException, UnexpectedAlertPresentException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
@@ -11,13 +11,26 @@ import csv
 
 if __name__ == "__main__":
     daxs = {}
-    with open("drivers_nric_dob.csv", "rb") as csvfile:
+    with open("drivers_nric_dob.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            daxs[row["nric"]] = [row["day"],row["month"],row["year"]]
+            # print row
 
+            # check for 2-digit birth day
+            if len(row["day"]) < 2:
+                two_digit_day = "0" + row["day"]
+            else:
+                two_digit_day = row["day"]    
 
-    print daxs
+            # check for 2-digit birth month
+            if len(row["month"]) < 2:
+                two_digit_month = "0" + row["month"]
+            else:
+                two_digit_month = row["month"]    
+
+            daxs[row["nric"]] = [row["name"], two_digit_day, two_digit_month, row["year"]]
+
+    print str(len(daxs)), "drivers loaded for checking"
 
 
     driver = webdriver.Chrome()
@@ -28,26 +41,30 @@ if __name__ == "__main__":
     driver.get(base_page)
 
 
-    for nric in daxs:
-        print "******"
+    for query_no, nric in enumerate(daxs):
+        if nric == "":
+            continue
+
+        print "****** #%d" % (query_no)
         query_success = True
 
         # Data to output
-        name = "No record"
-        private_car, private_car_validity, private_car_expiry = "No record", "No record" ,"No record"
-        taxi, taxi_validity, taxi_expiry = "No record", "No record", "No record"
-        omnibus, omnibus_validity ,omnibus_expiry = "No record", "No record", "No record"
-        general_bus, general_bus_validity ,general_bus_expiry = "No record", "No record", "No record"
-        bus_attendant, bus_attendant_validity, bus_attendant_expiry = "No record", "No record", "No record"
-        trishaw, trishaw_validity ,trishaw_expiry = "No record", "No record", "No record"
+        name = daxs[nric][0]
+        private_car, private_car_validity, private_car_expiry = "No", "" ,""
+        taxi, taxi_validity, taxi_expiry = "No", "", ""
+        omnibus, omnibus_validity ,omnibus_expiry = "No", "", ""
+        general_bus, general_bus_validity ,general_bus_expiry = "No", "", ""
+        bus_attendant, bus_attendant_validity, bus_attendant_expiry = "No", "", ""
+        trishaw, trishaw_validity ,trishaw_expiry = "No", "", ""
 
         print "Querying", nric
-        dax_dob = str(daxs[nric][0]) +"-"+ str(daxs[nric][1]) +"-"+ str(daxs[nric][2])
+        dax_dob = str(daxs[nric][1]) +"-"+ str(daxs[nric][2]) +"-"+ str(daxs[nric][3])
 
         # Send NRIC
         nric_field = WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.ID, "nric"))
                     )
+        nric_field.clear()
         nric_field.send_keys(nric)
 
         # Send DOB : DD - MM - YYYY
@@ -55,20 +72,20 @@ if __name__ == "__main__":
                     EC.presence_of_element_located((By.ID, "day"))
                     )
         day_field.clear()
-        day_field.send_keys(daxs[nric][0])
+        day_field.send_keys(daxs[nric][1])
 
         month_field = WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.ID, "month"))
                     )
         month_field.clear()
-        month_field.send_keys(daxs[nric][1])
+        month_field.send_keys(daxs[nric][2])
 
 
         year_field = WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.ID, "year"))
                     )
         year_field.clear()
-        year_field.send_keys(daxs[nric][2])
+        year_field.send_keys(daxs[nric][3])
 
         
         # Click the proceed button
@@ -77,7 +94,7 @@ if __name__ == "__main__":
                     )
         proceed_btn.click()
 
-        print nric, "is being queried"
+        print nric, daxs[nric][0], "is being queried"
 
         try:
             response = "Loading"
@@ -99,19 +116,30 @@ if __name__ == "__main__":
                 record_found = False
                 query_success = True
 
-        except:
+        except TimeoutException:
             print "Record found!"
             record_found = True
+        except UnexpectedAlertPresentException:
+            print "!Alert: invalid driver info added"
+            record_found = False
+            query_success = False
+
+            actions = ActionChains(driver)
+            actions.send_keys(Keys.RETURN)
+            actions.perform()
 
         # Will only proceed to extract driver info if a record was found, other proceed to writing the csv
         if record_found == True: 
             for licence_no in range(6):
                 try:
+                    """
                     name = WebDriverWait(driver, 5).until(
                            EC.presence_of_element_located((By.XPATH, 
                            "//*[@id=\"response\"]/div[2]/div[2]/div/div[1]/div[2]/p"))
                            ).text
-                    licence_type = WebDriverWait(driver, 0.1).until(
+                    """
+
+                    licence_type = WebDriverWait(driver, 5).until(
                                    EC.presence_of_element_located((By.XPATH, "//*[@id=\"response\"]/div[3]/div[2]/div/div["+str(licence_no+2)+"]/div[1]/p"))
                                 ).text
                     validity = WebDriverWait(driver, 0.1).until(
@@ -124,23 +152,23 @@ if __name__ == "__main__":
                         private_car = "Yes"
                         private_car_validity = validity
                         private_car_expiry = expiry_date
-                    elif "Taxi Driver's" in licence_type:
+                    elif "Taxi Driver" in licence_type:
                         taxi = "Yes"
                         taxi_validity = validity
                         taxi_expiry = expiry_date
-                    elif "Omnibus Driver's" in licence_type:
+                    elif "Omnibus" in licence_type:
                         omnibus = "Yes"
                         omnibus_validity = validity
                         omnibus_expiry = expiry_date
-                    elif "General Bus Driver's" in licence_type:
+                    elif "General Bus Driver" in licence_type:
                         general_bus = "Yes"
                         general_bus_validity = validity
                         general_bus_expiry = expiry_date
-                    elif "Bus Attendant's" in licence_type:
+                    elif "Bus Attendant" in licence_type:
                         bus_attendant = "Yes"
                         bus_attendant_validity = validity
                         bus_attendant_expiry = expiry_date
-                    elif "Trishaw Rider's" in licence_type:
+                    elif "Trishaw Rider" in licence_type:
                         trishaw = "Yes"
                         trishaw_validity = validity
                         trishaw_expiry = expiry_date
