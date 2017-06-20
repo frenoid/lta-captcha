@@ -176,7 +176,7 @@ if __name__ == "__main__":
     elif argv[1] == "all":
         queries = range(1, len(daxs)+1)
         print "Getting %d queries" % (len(daxs))
-    elif argv[2] == "all":
+    elif argv[2] == "end":
         queries = range(int(argv[1]), len(daxs))
         print "Getting %d to %d" % (int(argv[1]), len(daxs))
     else:
