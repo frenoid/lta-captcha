@@ -60,7 +60,7 @@ def readDriverLicences(driver,query_no,  nric, dax_dob, name,
     for licence_no in range(6):
         try:
 
-            licence_type = WebDriverWait(driver, 3).until(
+            licence_type = WebDriverWait(driver, 2).until(
                            EC.presence_of_element_located((By.XPATH, "//*[@id=\"response\"]/div[3]/div[2]/div/div["+str(licence_no+2)+"]/div[1]/p"))
                         ).text
             validity = WebDriverWait(driver, 0.1).until(
