@@ -180,12 +180,11 @@ if __name__ == "__main__":
         queries = range(int(argv[1]), len(daxs))
         print "Getting %d to %d" % (int(argv[1]), len(daxs))
     else:
-        queries  = range(int(argv[1]), int(argv[2]))
-        print "Getting %d to %d" % (int(argv[1]), len(daxs))
+        queries  = range(int(argv[1]), int(argv[2])+1)
+        print "Getting %d to %d" % (int(argv[1]), int(argv[2]))
 
 
     driver = webdriver.Chrome()
-    # driver =  webdriver.Firefox()
     base_page = "https://www.onemotoring.com.sg/content/onemotoring/en/lta_e_services/online_enquiries/vocational_licences.html"
 
     print "Website initialized"
