@@ -8,6 +8,25 @@ from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
 import csv
 
+def chromeSendKeys(driver, custom_element, custom_keys):
+    actions = webdriver.ActionChains(driver)
+    actions.move_to_element(custom_element)
+    actions.click()
+    actions.send_keys(custom_keys)
+    actions.send_keys(Keys.RETURN)
+    actions.perform()
+
+    return
+
+def chromeClick(driver, custom_element):
+    actions = webdriver.ActionChains(driver)
+    actions.move_to_element(custom_element)
+    actions.click()
+    actions.perform()
+
+    return
+
+
 if __name__ == "__main__":
 
     # Read in driver veh numbers
@@ -34,20 +53,24 @@ if __name__ == "__main__":
     veh_no_field = WebDriverWait(driver, 15).until(
                   EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[1]/div[2]/input"))
                   )
-    veh_no_field.send_keys("SLL8402R")
+    # veh_no_field.send_keys("SLL8402R")
+    chromeSendKeys(driver, veh_no_field, "SLL8402R")
 
     # Tick the checkbox
     checkbox = WebDriverWait(driver, 15).until(
                EC.presence_of_element_located((By.NAME, "tcCheckbox"))
                )
-    checkbox.click()
+    # checkbox.click()
+    chromeClick(driver, checkbox)
 
     # Input captcha_code
     captcha_code = raw_input("Enter the CAPTCHA: ")
     captcha_input = WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.NAME, "captchaResponse"))
                     )
-    captcha_input.send_keys(captcha_code)
+    # captcha_input.send_keys(captcha_code)
+    chromeSendKeys(driver, captcha_input, captcha_code)
+    
     # Click the submit button
     submit_button = WebDriverWait(driver, 15).until(
                    EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[5]/div/input[1]"))
@@ -59,7 +82,7 @@ if __name__ == "__main__":
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     for i in range(10):
         try:
-            submit_button.click()
+            chromeClick(driver, submit_button)
         except StaleElementReferenceException:
             break
     print "Submitting"
@@ -107,7 +130,8 @@ if __name__ == "__main__":
                    EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[1]/div[2]/input"))
                    )
             veh_no_field.clear()
-            veh_no_field.send_keys(driver_num)
+            # veh_no_field.send_keys(driver_num)
+            chromeSendKeys(driver, veh_no_field, driver_num)
             print "Vehicle number entered"
 
             # Tick the checkbox
@@ -117,7 +141,8 @@ if __name__ == "__main__":
             if checkbox.is_selected() == True:
                 pass
             else:
-                checkbox.click()
+                chromeClick(driver, checkbox)
+                # checkbox.click()
                 print "Check checkbox"
 
             # Ensure captcha is filled, otherwise, ask for new captcha
@@ -125,7 +150,9 @@ if __name__ == "__main__":
                             EC.presence_of_element_located((By.NAME, "captchaResponse"))
                             )
             captcha_input.clear()
-            captcha_input.send_keys(captcha_code)
+            # captcha_input.send_keys(captcha_code)
+            chromeSendKeys(driver, captcha_input, captcha_code)
+            
 
     
             # Click the submit button
@@ -138,7 +165,8 @@ if __name__ == "__main__":
                             )
             for i in range(1):
                 try:
-                    submit_button.click()
+                    chromeClick(driver, submit_button)
+                    # submit_button.click()
                 except StaleElementReferenceException:
                     break
             print "Submitting"
