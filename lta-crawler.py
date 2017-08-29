@@ -37,10 +37,10 @@ if __name__ == "__main__":
 
     print "%d vehicle numbers loaded" % (len(driver_numbers))
 
+    # Uses Chrome now
     driver = webdriver.Chrome()
     
 
-    # driver =  webdriver.Firefox()
     base_page = "https://vrl.lta.gov.sg/lta/vrl/action/pubfunc2?ID=EnquirePrivateHireScheme"
     prime_page = "https://vrl.lta.gov.sg/lta/vrl/action/enquirePrivateHireCars?FUNCTION_ID=F0401023ET"
 
