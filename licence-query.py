@@ -55,7 +55,8 @@ def readDriverLicences(driver,query_no,  nric, dax_dob, name,
                         omnibus, omnibus_validity, omnibus_expiry,
                         general_bus, general_bus_validity, general_bus_expiry,
                         bus_attendant, bus_attendant_validity, bus_attendant_expiry,
-                        trishaw, trishaw_validity, trishaw_expiry):
+                        trishaw, trishaw_validity, trishaw_expiry,
+                        atd, atd_validity, atd_expiry):
 
     for licence_no in range(6):
         try:
@@ -69,7 +70,7 @@ def readDriverLicences(driver,query_no,  nric, dax_dob, name,
             expiry_date = WebDriverWait(driver, 0.1).until(
                           EC.presence_of_element_located((By.XPATH, "//*[@id=\"response\"]/div[3]/div[2]/div/div["+str(licence_no+2)+"]/div[3]/p"))
                           ).text
-            if "Private Hire Car" in licence_type:
+            if "Private Hire Car's Vocational Licence" in licence_type:
                 private_car = "Yes"
                 private_car_validity = validity
                 private_car_expiry = expiry_date
@@ -93,6 +94,10 @@ def readDriverLicences(driver,query_no,  nric, dax_dob, name,
                 trishaw = "Yes"
                 trishaw_validity = validity
                 trishaw_expiry = expiry_date
+            elif "Approval to Drive" in licence_type:
+                atd = "Yes"
+                atd_validity = validity
+                atd_expiry = expiry_date
 
         # Timeout means no more licences were found
         except TimeoutException:
@@ -106,7 +111,8 @@ def readDriverLicences(driver,query_no,  nric, dax_dob, name,
                    omnibus, omnibus_validity, omnibus_expiry,\
                    general_bus, general_bus_validity, general_bus_expiry,\
                    bus_attendant, bus_attendant_validity, bus_attendant_expiry,\
-                   trishaw, trishaw_validity, trishaw_expiry]
+                   trishaw, trishaw_validity, trishaw_expiry,\
+                   atd, atd_validity, atd_expiry]
     return driver_info
 
 def getResponse(driver):
@@ -168,11 +174,12 @@ if __name__ == "__main__":
         # print daxs
 
 
-    if len(argv) < 1:
+    if len(argv) == 1:
         print "Need at least one argument"
-        print "Either <all>"
+        print "Either 'all'"
         print "Or <start_no> <end_no>"
         print "Or <start_no> <all>"
+        quit()
     elif argv[1] == "all":
         queries = range(1, len(daxs)+1)
         print "Getting %d queries" % (len(daxs))
@@ -205,6 +212,8 @@ if __name__ == "__main__":
         general_bus, general_bus_validity ,general_bus_expiry = "No", "", ""
         bus_attendant, bus_attendant_validity, bus_attendant_expiry = "No", "", ""
         trishaw, trishaw_validity ,trishaw_expiry = "No", "", ""
+        atd, atd_validity, atd_expiry = "No", "", ""
+
 
         # Skip if NRIC is blank, means it's an invalid NRIC
         if nric == "":
@@ -240,7 +249,8 @@ if __name__ == "__main__":
                             omnibus, omnibus_validity, omnibus_expiry,
                             general_bus, general_bus_validity, general_bus_expiry,
                             bus_attendant, bus_attendant_validity, bus_attendant_expiry,
-                            trishaw, trishaw_validity, trishaw_expiry)
+                            trishaw, trishaw_validity, trishaw_expiry,
+                            atd, atd_validity, atd_expiry)
         else:
             driver_info =   query_no ,nric, name, dax_dob,\
                             private_car, private_car_validity, private_car_expiry,\
@@ -248,7 +258,8 @@ if __name__ == "__main__":
                             omnibus, omnibus_validity, omnibus_expiry,\
                             general_bus, general_bus_validity, general_bus_expiry,\
                             bus_attendant, bus_attendant_validity, bus_attendant_expiry,\
-                            trishaw, trishaw_validity, trishaw_expiry
+                            trishaw, trishaw_validity, trishaw_expiry,\
+                            atd, atd_validity, atd_expiry
 
         with open("driver_licence_info.csv","ab") as csvfile:
             print "Writing to csv"
