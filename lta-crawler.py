@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchFrameException, StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException, WebDriverException, NoSuchFrameException, StaleElementReferenceException, UnexpectedAlertPresentException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
@@ -49,12 +49,11 @@ if __name__ == "__main__":
 
     print "Get cookie. Enter veh number and captcha"
     # Send in veh no
-    driver.switch_to.frame('main')
+    # driver.switch_to.frame('main')
     veh_no_field = WebDriverWait(driver, 15).until(
-                  EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[1]/div[2]/input"))
+                  EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div[3]/div[2]/form/div[1]/div[2]/input"))
                   )
-    # veh_no_field.send_keys("SLL8402R")
-    chromeSendKeys(driver, veh_no_field, "SLL8402R")
+    veh_no_field.send_keys("SLL8402R")
 
     # Tick the checkbox
     checkbox = WebDriverWait(driver, 15).until(
@@ -68,17 +67,17 @@ if __name__ == "__main__":
     captcha_input = WebDriverWait(driver, 15).until(
                     EC.presence_of_element_located((By.NAME, "captchaResponse"))
                     )
-    # captcha_input.send_keys(captcha_code)
-    chromeSendKeys(driver, captcha_input, captcha_code)
+    captcha_input.send_keys(captcha_code)
+    # chromeSendKeys(driver, captcha_input, captcha_code)
     
     # Click the submit button
     submit_button = WebDriverWait(driver, 15).until(
-                   EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[5]/div/input[1]"))
+                   EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div[3]/div[2]/form/div[5]/div/input[1]"))
                    )
 
     driver.switch_to.default_content()
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    driver.switch_to.frame("main")
+    # driver.switch_to.frame("main")
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     for i in range(10):
         try:
@@ -105,21 +104,17 @@ if __name__ == "__main__":
             sleep(1)
 
             actions = ActionChains(driver)
-            actions.send_keys(Keys.RETURN)
-            actions.perform()
+            actions.send_keys(Keys.RETURN).perform
           
             success, attempts = False, 0
             while success != True and attempts < 5:
                 attempts += 1
-                actions = ActionChains(driver)
-                actions.send_keys(Keys.RETURN)
-                actions.perform()
-                
                 try:
-                    driver.switch_to.frame('main')
+                    actions = ActionChains(driver)
+                    actions.send_keys(Keys.RETURN).perform()
                     success = True
-                except NoSuchFrameException:
-                    pass
+                except UnexpectedAlertPresentException:
+                    driver.switch_to_alert().accept()
 
             if captcha_code == "":
                 captcha_code = raw_input("Enter new captcha code: ")
@@ -127,11 +122,11 @@ if __name__ == "__main__":
 
             # Send in veh no
             veh_no_field = WebDriverWait(driver, 10).until(
-                   EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[1]/div[2]/input"))
+                   EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div[3]/div[2]/form/div[1]/div[2]/input"))
                    )
             veh_no_field.clear()
-            # veh_no_field.send_keys(driver_num)
-            chromeSendKeys(driver, veh_no_field, driver_num)
+            veh_no_field.send_keys(driver_num)
+            # chromeSendKeys(driver, veh_no_field, driver_num)
             print "Vehicle number entered"
 
             # Tick the checkbox
@@ -150,18 +145,18 @@ if __name__ == "__main__":
                             EC.presence_of_element_located((By.NAME, "captchaResponse"))
                             )
             captcha_input.clear()
-            # captcha_input.send_keys(captcha_code)
-            chromeSendKeys(driver, captcha_input, captcha_code)
+            captcha_input.send_keys(captcha_code)
+            # chromeSendKeys(driver, captcha_input, captcha_code)
             
 
     
             # Click the submit button
             driver.switch_to.default_content()
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            driver.switch_to.frame("main")
+            # driver.switch_to.frame("main")
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             submit_button = WebDriverWait(driver, 15).until(
-                            EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div[3]/div[2]/form/div[5]/div/input[1]"))
+                            EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div[3]/div[2]/form/div[5]/div/input[1]"))
                             )
             for i in range(1):
                 try:
@@ -209,17 +204,17 @@ if __name__ == "__main__":
             # Where a record was found in the system
             # Get pdvl info
             pdvl_status = WebDriverWait(driver,5).until(
-                          EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div/div/div[2]/div[2]/form/div[2]/div/p"))
+                          EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div/div/div[2]/div[2]/form/div[2]/div/p"))
                           )
 
             # Get car_make
             car_make = WebDriverWait(driver,5).until(
-                       EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div/div/div[2]/div[2]/form/div[3]/div/p"))
+                       EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div/div/div[2]/div[2]/form/div[3]/div/p"))
                        )
 
             # Get decal info
             decal_num = WebDriverWait(driver,5).until(
-                        EC.presence_of_element_located((By.XPATH, "/html/body/div/div[5]/div/div/div/div[2]/div[2]/form/div[4]/div/p"))
+                        EC.presence_of_element_located((By.XPATH, "//*[@id=\"main-content\"]/div/div/div[2]/div[2]/form/div[4]/div/p"))
                         )
 
             driver_info = [driver_count, driver_num, pdvl_status.text, car_make.text, decal_num.text]
