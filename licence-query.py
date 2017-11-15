@@ -145,15 +145,11 @@ def getResponse(driver):
 
     return record_found, query_success
 
-# Main function begins here
-if __name__ == "__main__":
-
-    daxs = {}
-    with open("drivers_nric_dob.csv", "r") as csvfile:
-        reader = csv.DictReader(csvfile)
+def readDriverDetails(daxs, csv_file):
+    
+    with open(csv_file, "r") as data_file:
+        reader = csv.DictReader(data_file)
         for row in reader:
-            # print row
-
             # make id_no an int
             id_no = int(row["id_no"])
 
@@ -170,9 +166,19 @@ if __name__ == "__main__":
                 two_digit_month = row["month"]    
 
             daxs[id_no] = [row["nric"],row["name"], two_digit_day, two_digit_month, row["year"]]
-        print str(len(daxs)), "drivers loaded"
-        # print daxs
 
+    return daxs
+
+
+# Main function begins here
+if __name__ == "__main__":
+
+    daxs = {}
+    csv_file = "drivers_nric_dob.csv"
+
+    # Read in driver NRIC and date of birth
+    daxs = readDriverDetails(daxs, csv_file)
+    print str(len(daxs)), "drivers loaded"
 
     if len(argv) == 1:
         print "Need at least one argument"
